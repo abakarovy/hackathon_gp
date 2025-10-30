@@ -168,9 +168,14 @@ function DashboardContent() {
                 noWrap={true}
                 attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> & <a href="https://www.maptiler.com/copyright/">MapTiler</a>'
               />
-              <Marker position={[41, 51]}>
+              <Marker position={[42.99750, 47.49700]}>
                 <Popup>
-                  Example location<br />You can add more markers!
+                  Махачкалинский порт
+                </Popup>
+              </Marker>
+              <Marker position={[40.2343, 49.5256]}>
+                <Popup>
+                  Махачкалинский порт
                 </Popup>
               </Marker>
             </MapContainer>
