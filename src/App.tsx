@@ -44,7 +44,7 @@ function Header() {
     <header className="fixed top-0 left-0 right-0 z-[1000] flex items-center justify-between px-8 h-20 bg-[#181c1e] rounded-2xl">
       {/* Logo left */}
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center font-bold text-white text-2xl">CG</div>
+        <img src="/applogo.png" alt="App logo" className="w-12 h-12 rounded-full object-cover" />
         <div className="leading-tight hidden sm:block select-none" style={{fontFamily: 'Nunito, Inter, Arial, sans-serif'}}>
           <div className="text-white text-lg font-light tracking-wide">CASPIAN</div>
           <div className="text-green-300 text-base font-normal tracking-wide">GREEN PORTS</div>
