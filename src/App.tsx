@@ -69,7 +69,7 @@ function Sidebar() {
   const activeCls = 'bg-green-500 text-white font-semibold';
   const baseBtn = 'w-full flex justify-center items-center gap-3 py-3 text-gray-200 hover:bg-gray-700 font-medium cursor-pointer text-base rounded-full';
   return (
-    <aside className="fixed left-0 top-28 z-20 w-64 ml-6 bg-[#212529] rounded-2xl pt-8 pb-6 min-h-[calc(100vh-8rem)] flex flex-col items-center gap-4 shadow-lg">
+    <aside className="fixed left-0 top-29 z-20 w-64 ml-6 bg-[#212529] rounded-2xl pt-8 pb-6 min-h-[calc(100vh-8rem)] flex flex-col items-center gap-4 shadow-lg">
       <button className="flex items-center gap-3 w-full mb-1 focus:outline-none justify-center" onClick={() => navigate('/profile')}>
         <img
           src="./src/assets/blank-profile.png"
@@ -99,7 +99,7 @@ function Layout() {
       <Header />
       <Sidebar />
       <div className="flex w-full">
-        <main className="flex-1 px-6 pt-32 pl-80">
+        <main className="flex-1 px-6 pt-30 pl-80">
           <Outlet />
         </main>
       </div>
@@ -187,8 +187,9 @@ function DashboardContent() {
                 </div>
               </div>
             </div>
-            <div className="text-center text-[#bdc9c5] text-[15px] font-normal mb-2 leading-tight">
-              Sowr magret casitone<br/>tiehrarne morerynol esik thsmre<br/>por tounelis
+            <div className="text-[#bdc9c5] text-[15px] font-normal mb-2 px-6 leading-tight">
+            Комплексный индекс экологической устойчивости порта. Чем выше показатель — тем чище вода, воздух и ниже уровень выбросов.
+
             </div>
             <div className="flex justify-between w-full my-1 gap-2 text-[13px]">
               <div className="flex flex-col items-center flex-1">
@@ -196,14 +197,14 @@ function DashboardContent() {
                   <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="8" stroke="#80FFBB" strokeWidth="2" fill="none"/><text x="4" y="13" fontSize="7" fill="#bdc9c5">CO₂</text></svg>
                 </span>
                 <span className="text-[#bdc9c5]">CO₂</span>
-                <span className="text-xs text-gray-400">1,7/2евим</span>
+                <span className="text-xs text-gray-400">ph</span>
               </div>
               <div className="flex flex-col items-center flex-1">
                 <span className="inline-block mb-1">
-                  <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="9" cy="11" rx="6" ry="4" fill="#A7FFEB" /><circle cx="7" cy="10" r="3" fill="#80FFBB" /></svg>
+                  <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="8" stroke="#80FFBB" strokeWidth="2" fill="none"/><text className='text-center' x="4" y="13" fontSize="7" fill="#bdc9c5">П</text></svg>
                 </span>
                 <span className="text-[#bdc9c5]">22%</span>
-                <span className="text-xs text-gray-400">29</span>
+                <span className="text-xs text-gray-400">7.0</span>
               </div>
             </div>
             <button className="mt-4 w-full py-2 text-center rounded-full bg-green-400 hover:bg-green-500 text-white font-semibold text-lg transition">
