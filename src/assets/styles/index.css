@@ -1,1 +1,9 @@
 @import "tailwindcss";
+@import 'leaflet/dist/leaflet.css';
+
+.leaflet-control-attribution a[href="https://leafletjs.com"] {
+    display: none !important;
+  }
+.leaflet-control-attribution {
+    display: none !important;
+}

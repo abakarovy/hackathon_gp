@@ -1,145 +1,363 @@
 import React from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Routes, Route, NavLink, Outlet } from 'react-router-dom';
+import { ResponsiveContainer, AreaChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import Auth from './loginPage';
 
-const sidebarLinks = [
-  { icon: '🏠', label: 'Главная — Кеуга пглов', active: true },
-  { icon: '📊', label: 'Сравнениe' },
-  { icon: '🔔', label: 'Подписки' },
-  { icon: '📧', label: 'Подoиски' },
-  { icon: '⚙️', label: 'Админ панель' },
+const caspianBounds: [[number, number], [number, number]] = [
+  [20, 40], // Southwest
+  [52, 70]  // Northeast
 ];
 
-const ports = [
-  { name: 'Баку', x: '30%', y: '24%' },
-  { name: 'Атырау', x: '57%', y: '33%' },
-  { name: 'Актау', x: '40%', y: '53%' },
-  { name: 'Максаскка', x: '24%', y: '73%' },
-  { name: 'Туркменбаши', x: '80%', y: '69%' },
+// Choose a tileset: prefer MapTiler Outdoor (green land) when key present, otherwise fallback to Carto Dark
+const MAPTILER_KEY = (import.meta as any).env?.VITE_MAPTILER_KEY as string | undefined;
+const TILE_URL = MAPTILER_KEY
+  ? `https://api.maptiler.com/maps/outdoor/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
+  : `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png`;
+
+// Demo series for charts
+const co2Data = [
+  { t: 't1', v: 30 },
+  { t: 't2', v: 35 },
+  { t: 't3', v: 50 },
+  { t: 't4', v: 45 },
+  { t: 't5', v: 65 },
+  { t: 't6', v: 55 },
+  { t: 't7', v: 72 },
+  { t: 't8', v: 60 },
 ];
 
-const summaryRows = [
-  ['🏠', 'Air', 'Air', 1, 4],
-  ['🏠', 'Air', 'Incidents', 5, 5],
-  ['🅲', 'CO₂', 'Инastweater', 8, 8],
-  ['#', 'Incidents', 'Wastewater', 8, 152],
+const tempData = [
+  { t: 't1', v: 42 },
+  { t: 't2', v: 58 },
+  { t: 't3', v: 50 },
+  { t: 't4', v: 62 },
+  { t: 't5', v: 54 },
+  { t: 't6', v: 66 },
+  { t: 't7', v: 53 },
+  { t: 't8', v: 64 },
 ];
 
-function Sidebar() {
+function Header() {
   return (
-    <aside className="w-64 bg-[#212529] rounded-l-2xl px-6 py-8 flex flex-col gap-6 min-h-full">
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center font-bold text-white text-lg">CG</div>
-        <div className="leading-tight">
-          <div className="font-bold text-white text-sm">CASPIAN</div>
-          <div className="text-green-400 text-xs font-semibold">GREEN PORTS</div>
+    <header className="fixed top-0 left-0 right-0 z-[1000] flex items-center justify-between px-8 h-20 bg-[#181c1e] rounded-2xl">
+      {/* Logo left */}
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center font-bold text-white text-2xl">CG</div>
+        <div className="leading-tight hidden sm:block select-none" style={{fontFamily: 'Nunito, Inter, Arial, sans-serif'}}>
+          <div className="text-white text-lg font-light tracking-wide">CASPIAN</div>
+          <div className="text-green-300 text-base font-normal tracking-wide">GREEN PORTS</div>
         </div>
       </div>
-      <input
-        placeholder="Search"
-        className="w-full bg-[#283138] text-gray-200 py-2 px-3 rounded mb-4 text-sm outline-none placeholder:text-gray-400"
-      />
-      <nav className="flex flex-col gap-3">
-        {sidebarLinks.map((l, i) => (
-          <div key={i} className={`flex items-center gap-3 px-3 py-2 rounded cursor-pointer text-sm font-medium ${l.active ? "bg-green-500/80 text-white" : "text-gray-300 hover:bg-[#222c2e]/50"}`}>
-            <span>{l.icon}</span> <span>{l.label}</span>
-          </div>
-        ))}
+      {/* Controls right */}
+      <div className="flex items-center gap-3">
+        <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#23282e] hover:bg-gray-700 text-gray-100 text-base font-medium transition">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+            <circle cx="11" cy="11" r="7" stroke="currentColor"/>
+            <line x1="16.65" y1="16.65" x2="21" y2="21" stroke="currentColor" strokeLinecap="round"/>
+          </svg>
+          Search
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function Sidebar() {
+  const activeCls = 'bg-green-500 text-white font-semibold';
+  const baseBtn = 'w-full flex justify-center items-center gap-3 py-3 text-gray-200 hover:bg-gray-700 font-medium cursor-pointer text-base rounded-full';
+  return (
+    <aside className="fixed left-0 top-28 z-20 w-64 ml-6 bg-[#212529] rounded-2xl pt-8 pb-6 min-h-[calc(100vh-8rem)] flex flex-col items-center gap-4 shadow-lg">
+      <button className="flex items-center gap-3 w-full mb-1 focus:outline-none justify-center">
+        <img
+          src="https://randomuser.me/api/portraits/men/10.jpg"
+          alt="avatar"
+          className="w-12 h-12 rounded-full object-cover"
+        />
+        <span className="text-white text-lg font-medium">Иван Иванов</span>
+      </button>
+      <nav className="flex flex-col gap-2 w-full mt-2">
+        <NavLink to="/" end className={({isActive}) => `${baseBtn} ${isActive ? activeCls : ''} rounded-none`}>
+          Главная
+        </NavLink>
+        <NavLink to="/compare" className={({isActive}) => `${baseBtn} ${isActive ? activeCls : ''} rounded-none`}>
+          Сравнение
+        </NavLink>
+        <NavLink to="/admin" className={({isActive}) => `${baseBtn} ${isActive ? activeCls : ''} rounded-none`}>
+          Админ панель
+        </NavLink>
       </nav>
     </aside>
   );
 }
 
-function MainMap() {
+function Layout() {
   return (
-    <div className="flex-1 bg-[#25362a] rounded-2xl p-4 flex flex-col min-h-[340px]">
-      <div className="flex items-center justify-between mb-2">
-        <span className="bg-green-500/70 text-white text-xs rounded-xl px-3 py-1 font-medium">Зеленые порты</span>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-white">Данные порты</span>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" value="" className="sr-only peer" defaultChecked />
-            <div className="w-11 h-6 bg-gray-600 peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-          </label>
-        </div>
-      </div>
-      {/* Fake SVG map area */}
-      <div className="flex-1 relative bg-[#2b5036] rounded-xl p-2 overflow-hidden flex items-center justify-center">
-        <svg viewBox="0 0 100 60" className="w-full h-60 max-w-3xl">
-          <rect x="0" y="0" width="100" height="60" fill="#31663e" />
-          {/* Border lines */}
-          <path d="M5,35 C20,20 40,20 55,30 C70,40 85,35 95,30" stroke="#223" strokeWidth="0.8" fill="#071" opacity="0.09" />
-          {ports.map((p, i) => (
-            <g key={i}>
-              <circle cx={p.x} cy={p.y} r={3.3} fill="#38e89c" />
-              <text x={p.x} y={`calc(${p.y} + 7%)`} fontSize={4} fill="white">{p.name}</text>
-            </g>
-          ))}
-        </svg>
+    <div className="bg-[#181c1e] min-h-screen w-full">
+      <Header />
+      <Sidebar />
+      <div className="flex w-full">
+        <main className="flex-1 px-6 pt-32 pl-80">
+          <Outlet />
+        </main>
       </div>
     </div>
   );
 }
 
-function StatsCard() {
+function DashboardContent() {
   return (
-    <div className="bg-[#212529] rounded-2xl p-6 flex flex-col gap-3 text-white items-center w-72">
-      <div className="w-28 h-28 rounded-full bg-green-200 flex items-center justify-center mb-3">
-        <span className="text-5xl font-bold text-green-700">92</span>
-      </div>
-      <div className="mb-2 mt-1 text-center">
-        <div className="font-bold text-xl text-green-400">Green Score</div>
-        <div className="text-xs text-gray-400 mt-1 leading-tight">Sowr magret casitone tiehrarne moreryl esik thsmre por tounenls</div>
-      </div>
-      <div className="flex justify-between items-center w-full text-xs text-gray-400 mt-2 mb-2 gap-2">
-        <div>
-          <div>CO₂</div>
-          <div>1,7/2евим</div>
+    <div className="flex flex-col w-full">
+      <div className="flex flex-row gap-4 w-full min-w-0 min-h-0">
+        {/* Map column */}
+        <div className="flex-[65_0_0%] min-w-[320px] flex-shrink-0">
+          <div className="bg-[#23282e] rounded-xl h-[480px] flex items-center justify-center overflow-hidden">
+            <MapContainer
+              center={[41, 32]}
+              zoom={5}
+              minZoom={3}
+              zoomControl={false}
+              style={{ height: '100%', width: '100%', borderRadius: '0.75rem' }}
+              className="focus:outline-none"
+              worldCopyJump={false}
+              maxBounds={caspianBounds}
+              maxBoundsViscosity={1.0}
+            >
+              <TileLayer
+                url={TILE_URL}
+                noWrap={true}
+                attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> & <a href="https://www.maptiler.com/copyright/">MapTiler</a>'
+              />
+              <Marker position={[41, 51]}>
+                <Popup>
+                  Example location<br />You can add more markers!
+                </Popup>
+              </Marker>
+            </MapContainer>
+          </div>
         </div>
-        <div>
-          <div>22%</div>
-          <div>7.9</div>
+        {/* Green Score column */}
+        <div className="flex-[35_0_0%] min-w-[220px] flex-shrink-0 ml-4">
+          <div className="bg-[#23282e] rounded-xl h-[480px] flex flex-col justify-center items-center p-5 overflow-hidden">
+            <div className="relative mb-2">
+              <div className="w-36 h-36 rounded-full bg-gradient-to-tr from-green-400 to-green-700 flex items-center justify-center mx-auto shadow-inner">
+                <div className="w-32 h-32 rounded-full bg-[#23282e] flex flex-col items-center justify-center">
+                  <span className="text-5xl font-extrabold text-white">92</span>
+                  <span className="text-green-700 mt-1 text-md font-medium">Green Score</span>
+                </div>
+              </div>
+            </div>
+            <div className="text-center text-[#bdc9c5] text-[15px] font-normal mb-2 leading-tight">
+              Sowr magret casitone<br/>tiehrarne morerynol esik thsmre<br/>por tounelis
+            </div>
+            <div className="flex justify-between w-full my-1 gap-2 text-[13px]">
+              <div className="flex flex-col items-center flex-1">
+                <span className="inline-block mb-1">
+                  <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="8" stroke="#80FFBB" strokeWidth="2" fill="none"/><text x="4" y="13" fontSize="7" fill="#bdc9c5">CO₂</text></svg>
+                </span>
+                <span className="text-[#bdc9c5]">CO₂</span>
+                <span className="text-xs text-gray-400">1,7/2евим</span>
+              </div>
+              <div className="flex flex-col items-center flex-1">
+                <span className="inline-block mb-1">
+                  <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="9" cy="11" rx="6" ry="4" fill="#A7FFEB" /><circle cx="7" cy="10" r="3" fill="#80FFBB" /></svg>
+                </span>
+                <span className="text-[#bdc9c5]">22%</span>
+                <span className="text-xs text-gray-400">29</span>
+              </div>
+            </div>
+            <button className="mt-4 w-full py-2 text-center rounded-full bg-green-400 hover:bg-green-500 text-white font-semibold text-lg transition">
+              Сообщить о проблеме
+            </button>
+          </div>
         </div>
       </div>
-      <button className="w-full mt-4 mb-1 py-2 rounded-xl bg-green-500 font-semibold text-base text-white hover:bg-green-600 transition">Павзросе в пвгте</button>
+
+      {/* Bottom section: Summary + Charts */}
+      <div className="mt-10 w-full">
+        <div className="flex flex-row gap-4 w-full min-w-0 min-h-0">
+          {/* Table */}
+          <div className="flex-[65_0_0%] min-w-[320px] flex-shrink-0">
+            <div className="bg-[#23282e] rounded-xl p-6 shadow flex flex-col">
+              <h2 className="text-xl text-white font-semibold mb-4">Сводка портов</h2>
+              <table className="w-full text-left text-sm text-gray-300">
+                <thead>
+                  <tr className="border-b border-gray-700">
+                    <th className="py-2">Дата</th>
+                    <th>Метрика</th>
+                    <th>Качество</th>
+                    <th>Источник (PDF)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-gray-800 last:border-none">
+                    <td className="py-3">2025-05-01</td>
+                    <td>PM2.5</td>
+                    <td>21 мкг/м3</td>
+                    <td><a className="text-green-400 underline" href="#">report.pdf</a></td>
+                  </tr>
+                  <tr className="border-b border-gray-800 last:border-none">
+                    <td className="py-3">2025-05-02</td>
+                    <td>CO₂</td>
+                    <td>6 мг/м3</td>
+                    <td><a className="text-green-400 underline" href="#">report.pdf</a></td>
+                  </tr>
+                  <tr>
+                    <td className="py-3">2025-05-03</td>
+                    <td>Water PH</td>
+                    <td>7.1</td>
+                    <td><a className="text-green-400 underline" href="#">report.pdf</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {/* Charts column */}
+          <div className="flex-[35_0_0%] min-w-[220px] flex-shrink-0 ml-4">
+            <div className="bg-[#23282e] rounded-xl p-4 mb-4">
+              <div className="text-white font-semibold mb-3">Выбросы CO<sub>2</sub></div>
+              <div className="w-full min-w-0">
+                <ResponsiveContainer width="100%" height={160}>
+                  <AreaChart data={co2Data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="co2Fill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#62a074" stopOpacity={0.35} />
+                        <stop offset="100%" stopColor="#62a074" stopOpacity={0.08} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke="#2f353b" strokeDasharray="3 3" />
+                    <XAxis dataKey="t" tick={{ fill: '#9aa3ad', fontSize: 11 }} axisLine={{ stroke: '#66707a' }} tickLine={{ stroke: '#66707a' }} />
+                    <YAxis tick={{ fill: '#9aa3ad', fontSize: 11 }} axisLine={{ stroke: '#66707a' }} tickLine={{ stroke: '#66707a' }} />
+                    <Tooltip contentStyle={{ background: '#1f2429', border: '1px solid #2f353b', color: '#e5e7eb' }} />
+                    <Area type="monotone" dataKey="v" stroke="none" fill="url(#co2Fill)" />
+                    <Line type="monotone" dataKey="v" stroke="#62a074" strokeWidth={3} dot={{ r: 3, stroke: '#62a074', fill: '#62a074' }} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div className="bg-[#23282e] rounded-xl p-4">
+              <div className="text-white font-semibold mb-3">Показатели температуры</div>
+              <div className="w-full min-w-0">
+                <ResponsiveContainer width="100%" height={160}>
+                  <AreaChart data={tempData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="tempFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#62a074" stopOpacity={0.35} />
+                        <stop offset="100%" stopColor="#62a074" stopOpacity={0.08} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke="#2f353b" strokeDasharray="3 3" />
+                    <XAxis dataKey="t" tick={{ fill: '#9aa3ad', fontSize: 11 }} axisLine={{ stroke: '#66707a' }} tickLine={{ stroke: '#66707a' }} />
+                    <YAxis tick={{ fill: '#9aa3ad', fontSize: 11 }} axisLine={{ stroke: '#66707a' }} tickLine={{ stroke: '#66707a' }} />
+                    <Tooltip contentStyle={{ background: '#1f2429', border: '1px solid #2f353b', color: '#e5e7eb' }} />
+                    <Area type="monotone" dataKey="v" stroke="none" fill="url(#tempFill)" />
+                    <Line type="monotone" dataKey="v" stroke="#62a074" strokeWidth={3} dot={{ r: 3, stroke: '#62a074', fill: '#62a074' }} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-function SummaryTable() {
-  return (
-    <div className="bg-[#212529] rounded-2xl p-4 mt-2 text-white w-full">
-      <div className="mb-2 text-lg font-semibold">Сводка порта</div>
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="text-gray-400">
-            <th className="py-2 text-left">Дата</th>
-            <th className="text-left">Метурга</th>
-            <th className="text-left">Знвнно</th>
-            <th className="text-left">Источник (PDF)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {summaryRows.map((row, i) => (
-            <tr key={i} className="border-b border-[#31383f] last:border-none">
-              <td className="py-2">{row[0]}</td>
-              <td>{row[1]}</td>
-              <td>{row[2]}</td>
-              <td>{row[3]} / {row[4]}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+function ComparePage() {
+  // Mock comparison datasets
+  const co2A = co2Data; // series A
+  const co2B = [
+    { t: 't1', v: 26 },
+    { t: 't2', v: 40 },
+    { t: 't3', v: 46 },
+    { t: 't4', v: 52 },
+    { t: 't5', v: 58 },
+    { t: 't6', v: 50 },
+    { t: 't7', v: 68 },
+    { t: 't8', v: 55 },
+  ];
 
-function Card({ title }: { title: string }) {
+  const tempA = tempData;
+  const tempB = [
+    { t: 't1', v: 48 },
+    { t: 't2', v: 60 },
+    { t: 't3', v: 55 },
+    { t: 't4', v: 65 },
+    { t: 't5', v: 52 },
+    { t: 't6', v: 62 },
+    { t: 't7', v: 58 },
+    { t: 't8', v: 67 },
+  ];
+
+  // Merge by key for Recharts multi-series
+  const mergeByKey = (a: {t:string,v:number}[], b: {t:string,v:number}[]) => a.map((p, i) => ({ t: p.t, a: p.v, b: b[i]?.v ?? p.v }));
+  const co2Merged = mergeByKey(co2A, co2B);
+  const tempMerged = mergeByKey(tempA, tempB);
+
   return (
-    <div className="bg-[#212529] rounded-2xl px-4 py-3 text-white h-44 flex flex-col gap-2 w-full">
-      <div className="text-sm font-semibold mb-1">{title}</div>
-      <div className="flex-1 flex items-center justify-center">
-        <svg height="60" width="160">
-          <polyline fill="none" stroke="#38e89c" strokeWidth="3" points="0,50 30,30 60,30 120,40 150,20 160,35" />
-        </svg>
+    <div className="w-full">
+      <h1 className="text-white text-2xl font-semibold mb-4">Сравнение</h1>
+      <div className="grid grid-cols-1 gap-6">
+        {/* CO2 comparison */}
+        <div className="bg-[#23282e] rounded-xl p-6">
+          <div className="text-white font-semibold mb-1">Выбросы CO₂ — сравнение</div>
+          <div className="text-gray-400 text-sm mb-4">Серия A (зелёный) vs Серия B (синий)</div>
+          <div className="w-full min-w-0" style={{ height: 280 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={co2Merged} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="cmpA1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#62a074" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#62a074" stopOpacity={0.08} />
+                  </linearGradient>
+                  <linearGradient id="cmpB1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#5ea1d6" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#5ea1d6" stopOpacity={0.08} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="#2f353b" strokeDasharray="3 3" />
+                <XAxis dataKey="t" tick={{ fill: '#9aa3ad', fontSize: 12 }} axisLine={{ stroke: '#66707a' }} tickLine={{ stroke: '#66707a' }} />
+                <YAxis tick={{ fill: '#9aa3ad', fontSize: 12 }} axisLine={{ stroke: '#66707a' }} tickLine={{ stroke: '#66707a' }} />
+                <Tooltip contentStyle={{ background: '#1f2429', border: '1px solid #2f353b', color: '#e5e7eb' }} />
+                <Area type="monotone" dataKey="a" name="Серия A" stroke="none" fill="url(#cmpA1)" />
+                <Area type="monotone" dataKey="b" name="Серия B" stroke="none" fill="url(#cmpB1)" />
+                <Line type="monotone" dataKey="a" stroke="#62a074" strokeWidth={3} dot={{ r: 3, stroke: '#62a074', fill: '#62a074' }} />
+                <Line type="monotone" dataKey="b" stroke="#5ea1d6" strokeWidth={3} dot={{ r: 3, stroke: '#5ea1d6', fill: '#5ea1d6' }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Temperature comparison */}
+        <div className="bg-[#23282e] rounded-xl p-6">
+          <div className="text-white font-semibold mb-1">Показатели температуры — сравнение</div>
+          <div className="text-gray-400 text-sm mb-4">Серия A (зелёный) vs Серия B (синий)</div>
+          <div className="w-full min-w-0" style={{ height: 280 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={tempMerged} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="cmpA2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#62a074" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#62a074" stopOpacity={0.08} />
+                  </linearGradient>
+                  <linearGradient id="cmpB2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#5ea1d6" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#5ea1d6" stopOpacity={0.08} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="#2f353b" strokeDasharray="3 3" />
+                <XAxis dataKey="t" tick={{ fill: '#9aa3ad', fontSize: 12 }} axisLine={{ stroke: '#66707a' }} tickLine={{ stroke: '#66707a' }} />
+                <YAxis tick={{ fill: '#9aa3ad', fontSize: 12 }} axisLine={{ stroke: '#66707a' }} tickLine={{ stroke: '#66707a' }} />
+                <Tooltip contentStyle={{ background: '#1f2429', border: '1px solid #2f353b', color: '#e5e7eb' }} />
+                <Area type="monotone" dataKey="a" name="Серия A" stroke="none" fill="url(#cmpA2)" />
+                <Area type="monotone" dataKey="b" name="Серия B" stroke="none" fill="url(#cmpB2)" />
+                <Line type="monotone" dataKey="a" stroke="#62a074" strokeWidth={3} dot={{ r: 3, stroke: '#62a074', fill: '#62a074' }} />
+                <Line type="monotone" dataKey="b" stroke="#5ea1d6" strokeWidth={3} dot={{ r: 3, stroke: '#5ea1d6', fill: '#5ea1d6' }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -147,23 +365,13 @@ function Card({ title }: { title: string }) {
 
 export default function App() {
   return (
-    <div className="flex bg-[#181c1e] min-h-screen w-full">
-      <Sidebar />
-      <main className="flex-1 flex flex-col gap-5 p-7 bg-[#181c1e]">
-        <div className="flex gap-5 w-full">
-          <MainMap />
-          <div className="flex flex-col gap-5 min-w-[290px]">
-            <StatsCard />
-          </div>
-        </div>
-        <div className="flex gap-5 mt-2 w-full">
-          <SummaryTable />
-          <div className="flex flex-col gap-4 min-w-[260px]">
-            <Card title="PM2.5 Levels" />
-            <Card title="CO₂ Emissions" />
-          </div>
-        </div>
-      </main>
-    </div>
+    <Routes>
+      <Route path="/login" element={<Auth />} />
+      <Route element={<Layout />}>
+        <Route path="/" element={<DashboardContent />} />
+        <Route path="/compare" element={<ComparePage />} />
+        <Route path="*" element={<DashboardContent />} />
+      </Route>
+    </Routes>
   );
 }
