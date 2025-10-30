@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Routes, Route, NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { ResponsiveContainer, AreaChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
@@ -99,7 +99,7 @@ function Layout() {
       <Header />
       <Sidebar />
       <div className="flex w-full">
-        <main className="flex-1 px-6 pt-30 pl-80">
+        <main className="flex-1 px-6 pt-30 pl-76">
           <Outlet />
         </main>
       </div>
@@ -150,7 +150,7 @@ function DashboardContent() {
     <div className="flex flex-col w-full">
       <div className="flex flex-row gap-4 w-full min-w-0 min-h-0">
         {/* Map column */}
-        <div className="flex-[65_0_0%] min-w-[320px] flex-shrink-0">
+        <div className="flex-[70_0_0%] min-w-[320px] flex-shrink-0">
           <div className="bg-[#23282e] rounded-xl h-[480px] flex items-center justify-center overflow-hidden">
             <MapContainer
               center={[41, 32]}
@@ -168,21 +168,22 @@ function DashboardContent() {
                 noWrap={true}
                 attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> & <a href="https://www.maptiler.com/copyright/">MapTiler</a>'
               />
-              <Marker position={[42.99750, 47.49700]}>
+              
+              <CircleMarker center={[42.99750, 47.49700]} pathOptions={{ color: '#62a074', fillColor: '#62a074', fillOpacity: 0.9 }} radius={8}>
                 <Popup>
                   Махачкалинский порт
                 </Popup>
-              </Marker>
-              <Marker position={[40.2343, 49.5256]}>
+              </CircleMarker>
+              <CircleMarker center={[40.2343, 49.5256]} pathOptions={{ color: '#62a074', fillColor: '#62a074', fillOpacity: 0.9 }} radius={8}>
                 <Popup>
-                  Махачкалинский порт
+                  Бакинский порт
                 </Popup>
-              </Marker>
+              </CircleMarker>
             </MapContainer>
           </div>
         </div>
         {/* Green Score column */}
-        <div className="flex-[35_0_0%] min-w-[220px] flex-shrink-0 ml-4">
+        <div className="flex-[35_0_0%] min-w-[220px] flex-shrink-0">
           <div className="bg-[#23282e] rounded-xl h-[480px] flex flex-col justify-center items-center p-5 overflow-hidden">
             <div className="relative mb-2">
               <div className="w-36 h-36 rounded-full bg-gradient-to-tr from-green-400 to-green-700 flex items-center justify-center mx-auto shadow-inner">
@@ -220,10 +221,10 @@ function DashboardContent() {
       </div>
 
       {/* Bottom section: Summary + Charts */}
-      <div className="mt-10 w-full">
+      <div className="mt-4 w-full">
         <div className="flex flex-row gap-4 w-full min-w-0 min-h-0">
           {/* Table */}
-          <div className="flex-[65_0_0%] min-w-[320px] flex-shrink-0">
+          <div className="flex-[70_0_0%] min-w-[320px] flex-shrink-0">
             <div className="bg-[#23282e] rounded-xl p-6 shadow flex flex-col">
               <h2 className="text-xl text-white font-semibold mb-4">Сводка портов</h2>
               <table className="w-full text-left text-sm text-gray-300">
@@ -259,7 +260,7 @@ function DashboardContent() {
             </div>
           </div>
           {/* Charts column */}
-          <div className="flex-[35_0_0%] min-w-[220px] flex-shrink-0 ml-4">
+          <div className="flex-[35_0_0%] min-w-[220px] flex-shrink-0">
             <div className="bg-[#23282e] rounded-xl p-4 mb-4">
               <div className="text-white font-semibold mb-3">Выбросы CO<sub>2</sub></div>
               <div className="w-full min-w-0">
