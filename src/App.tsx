@@ -4,10 +4,11 @@ import 'leaflet/dist/leaflet.css';
 import { Routes, Route, NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { ResponsiveContainer, AreaChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import Auth from './loginPage';
+import AdminPanel from './adminPanel';
 
 const caspianBounds: [[number, number], [number, number]] = [
-  [20, 40], // Southwest
-  [52, 70]  // Northeast
+  [25, 30], // Southwest
+  [60, 75]  // Northeast
 ];
 
 // Choose a tileset: prefer MapTiler Outdoor (green land) when key present, otherwise fallback to Carto Dark
@@ -66,11 +67,11 @@ function Header() {
 
 function Sidebar() {
   const navigate = useNavigate();
-  const activeCls = 'bg-green-500 text-white font-semibold';
-  const baseBtn = 'w-full flex justify-center items-center gap-3 py-3 text-gray-200 hover:bg-gray-700 font-medium cursor-pointer text-base rounded-full';
+  const activeCls = 'bg-[#05df72] text-white font-semibold transition-all';
+  const baseBtn = 'w-full flex justify-center items-center gap-3 py-3 text-gray-200 transition-all hover:bg-gray-700 font-medium cursor-pointer text-base rounded-full';
   return (
     <aside className="fixed left-0 top-29 z-20 w-64 ml-6 bg-[#212529] rounded-2xl pt-8 pb-6 min-h-[calc(100vh-8rem)] flex flex-col items-center gap-4 shadow-lg">
-      <button className="flex items-center gap-3 w-full mb-1 focus:outline-none justify-center" onClick={() => navigate('/profile')}>
+      <button className="flex items-center gap-3 w-full mb-1 justify-center" onClick={() => navigate('/profile')}>
         <img
           src="./src/assets/blank-profile.png"
           alt="profile"
@@ -109,10 +110,10 @@ function Layout() {
 
 function ProfilePage() {
   return (
-    <div className="w-full flex items-start justify-center">
+    <div className="w-full flex items-start justify-start">
       <div className="bg-[#23282e] rounded-2xl p-8 shadow max-w-xl w-full">
         <div className="flex items-center gap-4">
-          <img src="/blank-profile.png" alt="profile" className="w-16 h-16 rounded-full object-cover" />
+          <img src="./src/assets/blank-profile.png" alt="profile" className="w-16 h-16 rounded-full object-cover" />
           <div>
             <div className="text-white text-xl font-semibold">Иван Иванов</div>
             <div className="text-gray-300">ivan@example.com</div>
@@ -168,17 +169,56 @@ function DashboardContent() {
                 noWrap={true}
                 attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> & <a href="https://www.maptiler.com/copyright/">MapTiler</a>'
               />
-              
-              <CircleMarker center={[42.99750, 47.49700]} pathOptions={{ color: '#62a074', fillColor: '#62a074', fillOpacity: 0.9 }} radius={8}>
+              <Marker position={[42.99750, 47.49700]}>
                 <Popup>
-                  Махачкалинский порт
+                  <div className='flex flex-col justify-center items-center text-center'>
+                    <h1 className='font-bold text-2xl'>Махачкалинский порт</h1>
+                    <img src='https://upload.wikimedia.org/wikipedia/commons/2/28/Dagestan-062.jpg' className='rounded-2xl'/>
+                    <p>Расположен на западном побережье Каспийского моря</p>
+                    <button className='bg-black text-white p-2 pl-4 pr-4 rounded-2xl focus:bg-neutral-800'>Отправить заявку о загрязнении</button>
+                  </div>
                 </Popup>
-              </CircleMarker>
-              <CircleMarker center={[40.2343, 49.5256]} pathOptions={{ color: '#62a074', fillColor: '#62a074', fillOpacity: 0.9 }} radius={8}>
+              </Marker>
+              <Marker position={[40.2343, 49.5256]}>
                 <Popup>
-                  Бакинский порт
+                  <div className='flex flex-col justify-center items-center text-center'>
+                    <h1 className='font-bold text-2xl'>Бакинский порт</h1>
+                    <img src='https://paluba.media/wp-content/uploads/2022/03/03-4-scaled-e1646910732293.jpg' className='rounded-2xl'/>
+                    <p>Расположен на западном побережье Каспийского моря</p>
+                    <button className='bg-black text-white p-2 pl-4 pr-4 rounded-2xl focus:bg-neutral-800'>Отправить заявку о загрязнении</button>
+                  </div>
                 </Popup>
-              </CircleMarker>
+              </Marker>
+              <Marker position={[46.3667, 48.0078]}>
+                <Popup>
+                  <div className='flex flex-col justify-center items-center text-center'>
+                    <h1 className='font-bold text-2xl'>Астраханский порт</h1>
+                    <img src='https://upload.wikimedia.org/wikipedia/commons/5/51/Astrakhan_Volga_River_P5101222_2200.jpg' className='rounded-2xl'/>
+                    <p>Расположен на западном побережье Астраханский моря</p>
+                    <button className='bg-black text-white p-2 pl-4 pr-4 rounded-2xl focus:bg-neutral-800'>Отправить заявку о загрязнении</button>
+                  </div>
+                </Popup>
+              </Marker>
+              <Marker position={[43.6018, 51.2207]}>
+                <Popup>
+                  <div className='flex flex-col justify-center items-center text-center'>
+                    <h1 className='font-bold text-2xl'>Актауский порт</h1>
+                    <img src='https://upload.wikimedia.org/wikipedia/commons/1/1f/Port_Aktau.jpg' className='rounded-2xl'/>
+                    <p>Расположен на восточном побережье Астраханский моря</p>
+                    <button className='bg-black text-white p-2 pl-4 pr-4 rounded-2xl focus:bg-neutral-800'>Отправить заявку о загрязнении</button>
+                  </div>
+                </Popup>
+              </Marker>
+              <Marker position={[40.02216, 52.95517]}>
+                <Popup>
+                  <div className='flex flex-col justify-center items-center text-center'>
+                    <h1 className='font-bold text-2xl'>Туркменбашинский порт</h1>
+                    <img src='https://upload.wikimedia.org/wikipedia/commons/3/3b/Hafenviertel_T%C3%BCrkmenbaschy.jpg' className='rounded-2xl'/>
+                    <p>Расположен на восточном побережье Астраханский моря</p>
+                    <button className='bg-black text-white p-2 pl-4 pr-4 rounded-2xl focus:bg-neutral-800'>Отправить заявку о загрязнении</button>
+                  </div>
+                </Popup>
+              </Marker>
             </MapContainer>
           </div>
         </div>
@@ -417,6 +457,7 @@ export default function App() {
         <Route path="/" element={<DashboardContent />} />
         <Route path="/compare" element={<ComparePage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path='/admin' element={<AdminPanel />} />
         <Route path="*" element={<DashboardContent />} />
       </Route>
     </Routes>
