@@ -1,7 +1,7 @@
 import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Routes, Route, NavLink, Outlet } from 'react-router-dom';
+import { Routes, Route, NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { ResponsiveContainer, AreaChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import Auth from './loginPage';
 
@@ -47,7 +47,7 @@ function Header() {
         <img src="/applogo.png" alt="App logo" className="w-12 h-12 rounded-full object-cover" />
         <div className="leading-tight hidden sm:block select-none" style={{fontFamily: 'Nunito, Inter, Arial, sans-serif'}}>
           <div className="text-white text-lg font-light tracking-wide">CASPIAN</div>
-          <div className="text-green-300 text-base font-normal tracking-wide">GREEN PORTS</div>
+          <div className="text-green-300 text-base font-normal tracking-wide"><sub>GREEN PORTS</sub></div>
         </div>
       </div>
       {/* Controls right */}
@@ -65,14 +65,15 @@ function Header() {
 }
 
 function Sidebar() {
+  const navigate = useNavigate();
   const activeCls = 'bg-green-500 text-white font-semibold';
   const baseBtn = 'w-full flex justify-center items-center gap-3 py-3 text-gray-200 hover:bg-gray-700 font-medium cursor-pointer text-base rounded-full';
   return (
     <aside className="fixed left-0 top-28 z-20 w-64 ml-6 bg-[#212529] rounded-2xl pt-8 pb-6 min-h-[calc(100vh-8rem)] flex flex-col items-center gap-4 shadow-lg">
-      <button className="flex items-center gap-3 w-full mb-1 focus:outline-none justify-center">
+      <button className="flex items-center gap-3 w-full mb-1 focus:outline-none justify-center" onClick={() => navigate('/profile')}>
         <img
-          src="https://randomuser.me/api/portraits/men/10.jpg"
-          alt="avatar"
+          src="./src/assets/blank-profile.png"
+          alt="profile"
           className="w-12 h-12 rounded-full object-cover"
         />
         <span className="text-white text-lg font-medium">Иван Иванов</span>
@@ -101,6 +102,44 @@ function Layout() {
         <main className="flex-1 px-6 pt-32 pl-80">
           <Outlet />
         </main>
+      </div>
+    </div>
+  );
+}
+
+function ProfilePage() {
+  return (
+    <div className="w-full flex items-start justify-center">
+      <div className="bg-[#23282e] rounded-2xl p-8 shadow max-w-xl w-full">
+        <div className="flex items-center gap-4">
+          <img src="/blank-profile.png" alt="profile" className="w-16 h-16 rounded-full object-cover" />
+          <div>
+            <div className="text-white text-xl font-semibold">Иван Иванов</div>
+            <div className="text-gray-300">ivan@example.com</div>
+          </div>
+        </div>
+        <div className="mt-6 grid grid-cols-2 gap-4 text-gray-300 text-sm">
+          <div>
+            <div className="text-gray-400">Роль</div>
+            <div>Пользователь</div>
+          </div>
+          <div>
+            <div className="text-gray-400">Организация</div>
+            <div>Caspian Green Ports</div>
+          </div>
+          <div>
+            <div className="text-gray-400">Язык</div>
+            <div>Русский</div>
+          </div>
+          <div>
+            <div className="text-gray-400">Уведомления</div>
+            <div>Включены</div>
+          </div>
+        </div>
+        <div className="mt-8 flex items-center justify-between">
+          <Link to="/" className="text-green-400 hover:underline">Вернуться на главную</Link>
+          <Link to="/login" className="px-4 py-2 rounded-md bg-[#05df72] hover:bg-[#05c766] text-white font-medium">Выйти</Link>
+        </div>
       </div>
     </div>
   );
@@ -370,6 +409,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<DashboardContent />} />
         <Route path="/compare" element={<ComparePage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="*" element={<DashboardContent />} />
       </Route>
     </Routes>
