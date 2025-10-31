@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Routes, Route, NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
@@ -67,7 +67,7 @@ function Header() {
 
 function Sidebar() {
   const navigate = useNavigate();
-  const activeCls = 'bg-[#05df72] text-white font-semibold transition-all';
+  const activeCls = 'bg-[#009865] text-white font-semibold transition-all';
   const baseBtn = 'w-full flex justify-center items-center gap-3 py-3 text-gray-200 transition-all hover:bg-gray-700 font-medium cursor-pointer text-base rounded-full';
   return (
     <aside className="fixed left-0 top-29 z-20 w-64 ml-6 bg-[#212529] rounded-2xl pt-8 pb-6 min-h-[calc(100vh-8rem)] flex flex-col items-center gap-4 shadow-lg">
@@ -147,7 +147,35 @@ function ProfilePage() {
 }
 
 function DashboardContent() {
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState<boolean>(false)
+
+  const openReportDialog = () => {
+    setIsReportDialogOpen(true)
+  }
+
+  const closeReportDialog = () => {
+    setIsReportDialogOpen(false)
+  }
+
   return (
+    <>
+    {isReportDialogOpen && (
+      <div className='fixed flex flex-col origin-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-8 text-center rounded-2xl shadow-2xl bg-[#23282e] z-[9999] w-1/4 h-1/2'>
+        <button onClick={closeReportDialog} className="absolute top-4 right-4 text-white text-2xl hover:text-gray-400">&times;</button>
+        <h1 className='text-4xl text-white font-semibold'>Отправить жалобу</h1>
+        <select className='mt-4 p-2 rounded bg-[#181c1e] text-white border border-gray-600'>
+          <option value="" disabled selected>Выберите порт</option>
+          <option value="Актау">Актау</option>
+          <option value="Махачкала">Махачкала</option>
+          <option value="Баку">Баку</option>
+          <option value="Астрахань">Астрахань</option>
+          <option value="Туркменбаш">Туркменбаш</option>
+        </select>
+        <label className='mt-4 text-white text-left'>Комментарий</label>
+        <textarea className='mt-2 p-2 rounded bg-[#181c1e] text-white border border-gray-600 w-full flex-1 resize-none' placeholder="Опишите проблему..."></textarea>
+        <button onClick={closeReportDialog} className="mt-4 w-full py-2 text-center rounded-full bg-green-400 hover:bg-green-500 text-white font-semibold text-lg transition">Отправить жалобу</button>
+      </div>
+    )}
     <div className="flex flex-col w-full">
       <div className="flex flex-row gap-4 w-full min-w-0 min-h-0">
         {/* Map column */}
@@ -253,7 +281,7 @@ function DashboardContent() {
                 <span className="text-xs text-gray-400">7.0</span>
               </div>
             </div>
-            <button className="mt-4 w-full py-2 text-center rounded-full bg-green-400 hover:bg-green-500 text-white font-semibold text-lg transition">
+            <button onClick={openReportDialog} className="mt-4 w-full py-2 text-center rounded-full bg-green-400 hover:bg-green-500 text-white font-semibold text-lg transition">
               Сообщить о проблеме
             </button>
           </div>
@@ -347,6 +375,7 @@ function DashboardContent() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
