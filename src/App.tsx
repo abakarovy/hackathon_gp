@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Routes, Route, NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { ResponsiveContainer, AreaChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
@@ -84,7 +84,7 @@ function Sidebar() {
     <aside className="fixed left-0 top-29 z-20 w-64 ml-6 bg-[#212529] rounded-2xl pt-8 pb-6 min-h-[calc(100vh-8rem)] flex flex-col items-center gap-4 shadow-lg">
       <button className="flex items-center gap-3 w-full mb-1 justify-center" onClick={() => navigate('/profile')}>
         <img
-          src="./src/assets/blank-profile.png"
+          src="/blank-profile.png"
           alt="profile"
           className="w-12 h-12 rounded-full object-cover"
         />
@@ -127,7 +127,7 @@ function ProfilePage() {
     <div className="w-full flex items-start justify-start">
       <div className="bg-[#23282e] rounded-2xl p-8 shadow max-w-xl w-full">
         <div className="flex items-center gap-4">
-          <img src="./src/assets/blank-profile.png" alt="profile" className="w-16 h-16 rounded-full object-cover" />
+          <img src="/blank-profile.png" alt="profile" className="w-16 h-16 rounded-full object-cover" />
           <div>
             <div className="text-white text-xl font-semibold">Иван Иванов</div>
             <div className="text-gray-300">ivan@example.com</div>
@@ -211,6 +211,7 @@ function DashboardContent() {
                 noWrap={true}
                 attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> & <a href="https://www.maptiler.com/copyright/">MapTiler</a>'
               />
+              <CircleMarker center={[42.99750, 47.49700]} fill color='orange' fillColor='orange'></CircleMarker>
               <Marker position={[42.99750, 47.49700]}>
                 <Popup>
                   <div className='flex flex-col justify-center items-center text-center'>
@@ -221,6 +222,8 @@ function DashboardContent() {
                   </div>
                 </Popup>
               </Marker>
+
+              <CircleMarker center={[40.2343, 49.5256]} fill color='green' fillColor='green'></CircleMarker>
               <Marker position={[40.2343, 49.5256]}>
                 <Popup>
                   <div className='flex flex-col justify-center items-center text-center'>
