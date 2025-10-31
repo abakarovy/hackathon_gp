@@ -73,7 +73,11 @@ export default function AdminPanel() {
                         <div>
                             <label className="block text-sm text-gray-400 mb-2">Порт</label>
                             <select className="w-full bg-[#2d3339] text-white px-4 py-2 rounded-lg border-none focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                                <option>Aktau</option>
+                                <option>Актау</option>
+                                <option>Махачкала</option>
+                                <option>Астрахань</option>
+                                <option>Баку</option>
+                                <option>Туркменбаши</option>
                             </select>
                         </div>
                         <div>

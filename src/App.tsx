@@ -40,7 +40,7 @@ const tempData = [
   { t: 't8', v: 64 },
 ];
 
-function Header({isDark, toggleDark}: {isDark: boolean; toggleDark: () => void}) {
+function Header({isDark, toggleDark, openSubscriptionDialog}: {isDark: boolean; toggleDark: () => void; openSubscriptionDialog: () => void}) {
   return (
     <header className={`fixed top-0 left-0 right-0 z-[1000] flex items-center justify-between px-8 h-20 ${isDark ? 'bg-[#181c1e]' : 'bg-white'} rounded-2xl`}>
       {/* Logo left */}
@@ -64,12 +64,11 @@ function Header({isDark, toggleDark}: {isDark: boolean; toggleDark: () => void})
             </svg>
           )}
         </button>
-        <button className={`flex items-center gap-2 px-5 py-2.5 rounded-lg ${isDark ? 'bg-[#23282e] hover:bg-gray-700 text-gray-100' : 'bg-gray-200 hover:bg-gray-300 text-black'} text-base font-medium transition`}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-            <circle cx="11" cy="11" r="7" stroke="currentColor"/>
-            <line x1="16.65" y1="16.65" x2="21" y2="21" stroke="currentColor" strokeLinecap="round"/>
+        <button onClick={openSubscriptionDialog} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg ${isDark ? 'bg-[#23282e] hover:bg-gray-700 text-gray-100' : 'bg-gray-200 hover:bg-gray-300 text-black'} text-base font-medium transition`}>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
           </svg>
-          Search
+          Подписка на уведомления
         </button>
       </div>
     </header>
@@ -108,10 +107,29 @@ function Sidebar() {
 function Layout() {
   const [isDark, setIsDark] = useState(true);
   const toggleDark = () => setIsDark(!isDark);
+  const [isSubscriptionDialogOpen, setIsSubscriptionDialogOpen] = useState(false);
+  const openSubscriptionDialog = () => setIsSubscriptionDialogOpen(true);
+  const closeSubscriptionDialog = () => setIsSubscriptionDialogOpen(false);
 
   return (
     <div className={`${isDark ? 'bg-[#181c1e]' : 'bg-white'} min-h-screen w-full ${!isDark ? 'text-black' : ''}`}>
-      <Header isDark={isDark} toggleDark={toggleDark} />
+      <Header isDark={isDark} toggleDark={toggleDark} openSubscriptionDialog={openSubscriptionDialog} />
+      {isSubscriptionDialogOpen && (
+        <div className='fixed flex flex-col origin-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-8 text-center rounded-2xl shadow-2xl bg-[#23282e] z-[9999] w-1/4 h-1/2'>
+          <button onClick={closeSubscriptionDialog} className="absolute top-4 right-4 text-white text-2xl hover:text-gray-400">&times;</button>
+          <h1 className='text-4xl text-white font-semibold mt-8'>Подписка на уведомления</h1>
+          <input type="text" placeholder="Telegram username or Email" className='mt-4 p-2 rounded bg-[#181c1e] text-white border border-gray-600 w-full' />
+          <select className='mt-4 p-2 rounded bg-[#181c1e] text-white border border-gray-600'>
+            <option value="" disabled selected>Выберите порт</option>
+            <option value="Актау">Актау</option>
+            <option value="Махачкала">Махачкала</option>
+            <option value="Баку">Баку</option>
+            <option value="Астрахань">Астрахань</option>
+            <option value="Туркменбаш">Туркменбаш</option>
+          </select>
+          <button onClick={closeSubscriptionDialog} className="mt-4 w-full py-2 text-center rounded-full bg-green-400 hover:bg-green-500 text-white font-semibold text-lg transition">Подписаться</button>
+        </div>
+      )}
       <Sidebar />
       <div className="flex w-full">
         <main className="flex-1 px-6 pt-30 pl-76">
@@ -162,13 +180,29 @@ function ProfilePage() {
 
 function DashboardContent() {
   const [isReportDialogOpen, setIsReportDialogOpen] = useState<boolean>(false)
+  const [isComplaintSent, setIsComplaintSent] = useState<boolean>(false)
+  const [selectedPort, setSelectedPort] = useState<string>('Баку')
+
+  const portData: Record<string, { score: number; co2: string; ph: string }> = {
+    'Махачкала': { score: 65, co2: '18%', ph: '6.5' },
+    'Баку': { score: 92, co2: '22%', ph: '7.0' },
+    'Астрахань': { score: 78, co2: '25%', ph: '7.8' },
+    'Актау': { score: 88, co2: '20%', ph: '6.9' },
+    'Туркменбаш': { score: 75, co2: '30%', ph: '7.5' },
+  };
 
   const openReportDialog = () => {
     setIsReportDialogOpen(true)
+    setIsComplaintSent(false)
+  }
+
+  const sendComplaint = () => {
+    setIsComplaintSent(true)
   }
 
   const closeReportDialog = () => {
     setIsReportDialogOpen(false)
+    setIsComplaintSent(false)
   }
 
   return (
@@ -176,18 +210,28 @@ function DashboardContent() {
     {isReportDialogOpen && (
       <div className='fixed flex flex-col origin-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-8 text-center rounded-2xl shadow-2xl bg-[#23282e] z-[9999] w-1/4 h-1/2'>
         <button onClick={closeReportDialog} className="absolute top-4 right-4 text-white text-2xl hover:text-gray-400">&times;</button>
-        <h1 className='text-4xl text-white font-semibold'>Отправить жалобу</h1>
-        <select className='mt-4 p-2 rounded bg-[#181c1e] text-white border border-gray-600'>
-          <option value="" disabled selected>Выберите порт</option>
-          <option value="Актау">Актау</option>
-          <option value="Махачкала">Махачкала</option>
-          <option value="Баку">Баку</option>
-          <option value="Астрахань">Астрахань</option>
-          <option value="Туркменбаш">Туркменбаш</option>
-        </select>
-        <label className='mt-4 text-white text-left'>Комментарий</label>
-        <textarea className='mt-2 p-2 rounded bg-[#181c1e] text-white border border-gray-600 w-full flex-1 resize-none' placeholder="Опишите проблему..."></textarea>
-        <button onClick={closeReportDialog} className="mt-4 w-full py-2 text-center rounded-full bg-green-400 hover:bg-green-500 text-white font-semibold text-lg transition">Отправить жалобу</button>
+        {isComplaintSent ? (
+          <>
+            <h1 className='text-4xl text-white font-semibold'>Жалоба отправлена</h1>
+            <p className='mt-4 text-white text-lg'>Подпишитесь на наши уведомления, чтобы получать подробности</p>
+            <span className='text-6xl mt-4 block'>🎉</span>
+          </>
+        ) : (
+          <>
+            <h1 className='text-4xl text-white font-semibold'>Отправить жалобу</h1>
+            <select className='mt-4 p-2 rounded bg-[#181c1e] text-white border border-gray-600'>
+              <option value="" disabled selected>Выберите порт</option>
+              <option value="Актау">Актау</option>
+              <option value="Махачкала">Махачкала</option>
+              <option value="Баку">Баку</option>
+              <option value="Астрахань">Астрахань</option>
+              <option value="Туркменбаш">Туркменбаш</option>
+            </select>
+            <label className='mt-4 text-white text-left'>Комментарий</label>
+            <textarea className='mt-2 p-2 rounded bg-[#181c1e] text-white border border-gray-600 w-full flex-1 resize-none' placeholder="Опишите проблему..."></textarea>
+            <button onClick={sendComplaint} className="mt-4 w-full py-2 text-center rounded-full bg-green-400 hover:bg-green-500 text-white font-semibold text-lg transition">Отправить жалобу</button>
+          </>
+        )}
       </div>
     )}
     <div className="flex flex-col w-full">
@@ -212,7 +256,7 @@ function DashboardContent() {
                 attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> & <a href="https://www.maptiler.com/copyright/">MapTiler</a>'
               />
               <CircleMarker center={[42.99750, 47.49700]} fill color='orange' fillColor='orange'></CircleMarker>
-              <Marker position={[42.99750, 47.49700]}>
+              <Marker position={[42.99750, 47.49700]} eventHandlers={{ click: () => setSelectedPort('Махачкала') }}>
                 <Popup>
                   <div className='flex flex-col justify-center items-center text-center'>
                     <h1 className='font-bold text-2xl'>Махачкалинский порт</h1>
@@ -224,7 +268,7 @@ function DashboardContent() {
               </Marker>
 
               <CircleMarker center={[40.2343, 49.5256]} fill color='green' fillColor='green'></CircleMarker>
-              <Marker position={[40.2343, 49.5256]}>
+              <Marker position={[40.2343, 49.5256]} eventHandlers={{ click: () => setSelectedPort('Баку') }}>
                 <Popup>
                   <div className='flex flex-col justify-center items-center text-center'>
                     <h1 className='font-bold text-2xl'>Бакинский порт</h1>
@@ -234,7 +278,7 @@ function DashboardContent() {
                   </div>
                 </Popup>
               </Marker>
-              <Marker position={[46.3667, 48.0078]}>
+              <Marker position={[46.3667, 48.0078]} eventHandlers={{ click: () => setSelectedPort('Астрахань') }}>
                 <Popup>
                   <div className='flex flex-col justify-center items-center text-center'>
                     <h1 className='font-bold text-2xl'>Астраханский порт</h1>
@@ -244,7 +288,7 @@ function DashboardContent() {
                   </div>
                 </Popup>
               </Marker>
-              <Marker position={[43.6018, 51.2207]}>
+              <Marker position={[43.6018, 51.2207]} eventHandlers={{ click: () => setSelectedPort('Актау') }}>
                 <Popup>
                   <div className='flex flex-col justify-center items-center text-center'>
                     <h1 className='font-bold text-2xl'>Актауский порт</h1>
@@ -254,7 +298,7 @@ function DashboardContent() {
                   </div>
                 </Popup>
               </Marker>
-              <Marker position={[40.02216, 52.95517]}>
+              <Marker position={[40.02216, 52.95517]} eventHandlers={{ click: () => setSelectedPort('Туркменбаш') }}>
                 <Popup>
                   <div className='flex flex-col justify-center items-center text-center'>
                     <h1 className='font-bold text-2xl'>Туркменбашинский порт</h1>
@@ -271,10 +315,10 @@ function DashboardContent() {
         <div className="flex-[35_0_0%] min-w-[220px] flex-shrink-0">
           <div className="bg-[#23282e] rounded-xl h-[480px] flex flex-col justify-center items-center p-5 overflow-hidden">
             <div className="relative mb-2">
-              <div className="w-36 h-36 rounded-full bg-gradient-to-tr from-green-400 to-green-700 flex items-center justify-center mx-auto shadow-inner">
+              <div className={`w-36 h-36 rounded-full bg-gradient-to-tr transition-all ${portData[selectedPort].score > 70 ? `from-green-400 to-green-700` : `from-orange-400 to-orange-700`} flex items-center justify-center mx-auto shadow-inner`}>
                 <div className="w-32 h-32 rounded-full bg-[#23282e] flex flex-col items-center justify-center">
-                  <span className="text-5xl font-extrabold text-white">92</span>
-                  <span className="text-green-700 mt-1 text-md font-medium">Green Score</span>
+                  <span className="text-5xl font-extrabold text-white">{portData[selectedPort]?.score || 92}</span>
+                  <span className="text-green-400 mt-1 text-md font-medium">Green Score</span>
                 </div>
               </div>
             </div>
@@ -294,8 +338,8 @@ function DashboardContent() {
                 <span className="inline-block mb-1">
                   <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="8" stroke="#80FFBB" strokeWidth="2" fill="none"/><text className='text-center' x="4" y="13" fontSize="7" fill="#bdc9c5">П</text></svg>
                 </span>
-                <span className="text-[#bdc9c5]">22%</span>
-                <span className="text-xs text-gray-400">7.0</span>
+                <span className="text-[#bdc9c5]">{portData[selectedPort]?.co2 || '22%'}</span>
+                <span className="text-xs text-gray-400">{portData[selectedPort]?.ph || '7.0'}</span>
               </div>
             </div>
             <button onClick={openReportDialog} className="mt-4 w-full py-2 text-center rounded-full bg-green-400 hover:bg-green-500 text-white font-semibold text-lg transition">
