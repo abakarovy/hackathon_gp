@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from 'react-leaflet';
+import { useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Routes, Route, NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { ResponsiveContainer, AreaChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
@@ -40,20 +40,31 @@ const tempData = [
   { t: 't8', v: 64 },
 ];
 
-function Header() {
+function Header({isDark, toggleDark}: {isDark: boolean; toggleDark: () => void}) {
   return (
-    <header className="fixed top-0 left-0 right-0 z-[1000] flex items-center justify-between px-8 h-20 bg-[#181c1e] rounded-2xl">
+    <header className={`fixed top-0 left-0 right-0 z-[1000] flex items-center justify-between px-8 h-20 ${isDark ? 'bg-[#181c1e]' : 'bg-white'} rounded-2xl`}>
       {/* Logo left */}
       <div className="flex items-center gap-3">
         <img src="/applogo.png" alt="App logo" className="w-12 h-12 rounded-full object-cover" />
         <div className="leading-tight hidden sm:block select-none" style={{fontFamily: 'Nunito, Inter, Arial, sans-serif'}}>
-          <div className="text-white text-lg font-light tracking-wide">CASPIAN</div>
-          <div className="text-green-300 text-base font-normal tracking-wide"><sub>GREEN PORTS</sub></div>
+          <div className={`text-lg font-light tracking-wide ${isDark ? 'text-white' : 'text-gray-900'}`}>CASPIAN</div>
+          <div className={`text-base font-normal tracking-wide ${isDark ? 'text-green-300' : 'text-green-600'}`}><sub>GREEN PORTS</sub></div>
         </div>
       </div>
       {/* Controls right */}
       <div className="flex items-center gap-3">
-        <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#23282e] hover:bg-gray-700 text-gray-100 text-base font-medium transition">
+        <button onClick={toggleDark} className={`flex items-center gap-2 px-3 py-3 rounded-lg ${isDark ? 'bg-[#23282e] hover:bg-gray-700 text-gray-100' : 'bg-gray-200 hover:bg-gray-300 text-black'} text-base font-medium transition`}>
+          {isDark ? (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"></path>
+            </svg>
+          )}
+        </button>
+        <button className={`flex items-center gap-2 px-5 py-2.5 rounded-lg ${isDark ? 'bg-[#23282e] hover:bg-gray-700 text-gray-100' : 'bg-gray-200 hover:bg-gray-300 text-black'} text-base font-medium transition`}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
             <circle cx="11" cy="11" r="7" stroke="currentColor"/>
             <line x1="16.65" y1="16.65" x2="21" y2="21" stroke="currentColor" strokeLinecap="round"/>
@@ -95,9 +106,12 @@ function Sidebar() {
 }
 
 function Layout() {
+  const [isDark, setIsDark] = useState(true);
+  const toggleDark = () => setIsDark(!isDark);
+
   return (
-    <div className="bg-[#181c1e] min-h-screen w-full">
-      <Header />
+    <div className={`${isDark ? 'bg-[#181c1e]' : 'bg-white'} min-h-screen w-full ${!isDark ? 'text-black' : ''}`}>
+      <Header isDark={isDark} toggleDark={toggleDark} />
       <Sidebar />
       <div className="flex w-full">
         <main className="flex-1 px-6 pt-30 pl-76">
