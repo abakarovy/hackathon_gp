@@ -17,16 +17,16 @@ const TILE_URL = MAPTILER_KEY
   ? `https://api.maptiler.com/maps/outdoor/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
   : `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png`;
 
-// Demo series for charts
+// Demo series for charts (default)
 const co2Data = [
   { t: 't1', v: 30 },
-  { t: 't2', v: 35 },
+  { t: 't2', v: 32 },
   { t: 't3', v: 50 },
-  { t: 't4', v: 45 },
-  { t: 't5', v: 65 },
+  { t: 't4', v: 51 },
+  { t: 't5', v: 69 },
   { t: 't6', v: 55 },
-  { t: 't7', v: 72 },
-  { t: 't8', v: 60 },
+  { t: 't7', v: 60 },
+  { t: 't8', v: 55 },
 ];
 
 const tempData = [
@@ -39,6 +39,119 @@ const tempData = [
   { t: 't7', v: 53 },
   { t: 't8', v: 64 },
 ];
+
+const portDataChart: Record<string, { co2: {t:string,v:number}[], temp: {t:string,v:number}[] }> = {
+  'Махачкала': {
+    co2: [
+      { t: 't1', v: 15 },
+      { t: 't2', v: 25 },
+      { t: 't3', v: 60 },
+      { t: 't4', v: 50 },
+      { t: 't5', v: 85 },
+      { t: 't6', v: 70 },
+      { t: 't7', v: 90 },
+      { t: 't8', v: 80 },
+    ],
+    temp: [
+      { t: 't1', v: 30 },
+      { t: 't2', v: 45 },
+      { t: 't3', v: 55 },
+      { t: 't4', v: 35 },
+      { t: 't5', v: 50 },
+      { t: 't6', v: 65 },
+      { t: 't7', v: 40 },
+      { t: 't8', v: 55 },
+    ],
+  },
+  'Баку': {
+    co2: [
+      { t: 't1', v: 30 },
+      { t: 't2', v: 35 },
+      { t: 't3', v: 50 },
+      { t: 't4', v: 45 },
+      { t: 't5', v: 65 },
+      { t: 't6', v: 55 },
+      { t: 't7', v: 72 },
+      { t: 't8', v: 60 },
+    ],
+    temp: [
+      { t: 't1', v: 42 },
+      { t: 't2', v: 58 },
+      { t: 't3', v: 50 },
+      { t: 't4', v: 62 },
+      { t: 't5', v: 54 },
+      { t: 't6', v: 66 },
+      { t: 't7', v: 53 },
+      { t: 't8', v: 64 },
+    ],
+  },
+  'Астрахань': {
+    co2: [
+      { t: 't1', v: 10 },
+      { t: 't2', v: 20 },
+      { t: 't3', v: 30 },
+      { t: 't4', v: 42 },
+      { t: 't5', v: 45 },
+      { t: 't6', v: 55 },
+      { t: 't7', v: 40 },
+      { t: 't8', v: 35 },
+    ],
+    temp: [
+      { t: 't1', v: 25 },
+      { t: 't2', v: 30 },
+      { t: 't3', v: 40 },
+      { t: 't4', v: 38 },
+      { t: 't5', v: 50 },
+      { t: 't6', v: 45 },
+      { t: 't7', v: 55 },
+      { t: 't8', v: 60 },
+    ],
+  },
+  'Актау': {
+    co2: [
+      { t: 't1', v: 40 },
+      { t: 't2', v: 60 },
+      { t: 't3', v: 70 },
+      { t: 't4', v: 75 },
+      { t: 't5', v: 50 },
+      { t: 't6', v: 55 },
+      { t: 't7', v: 45 },
+      { t: 't8', v: 80 },
+    ],
+    temp: [
+      { t: 't1', v: 50 },
+      { t: 't2', v: 55 },
+      { t: 't3', v: 60 },
+      { t: 't4', v: 65 },
+      { t: 't5', v: 70 },
+      { t: 't6', v: 68 },
+      { t: 't7', v: 72 },
+      { t: 't8', v: 75 },
+    ],
+  },
+  'Туркменбаш': {
+    co2: [
+      { t: 't1', v: 50 },
+      { t: 't2', v: 45 },
+      { t: 't3', v: 60 },
+      { t: 't4', v: 65 },
+      { t: 't5', v: 80 },
+      { t: 't6', v: 85 },
+      { t: 't7', v: 95 },
+      { t: 't8', v: 90 },
+    ],
+    temp: [
+      { t: 't1', v: 35 },
+      { t: 't2', v: 40 },
+      { t: 't3', v: 45 },
+      { t: 't4', v: 50 },
+      { t: 't5', v: 55 },
+      { t: 't6', v: 60 },
+      { t: 't7', v: 65 },
+      { t: 't8', v: 70 },
+    ],
+  },
+};
 
 function Header({isDark, toggleDark, openSubscriptionDialog}: {isDark: boolean; toggleDark: () => void; openSubscriptionDialog: () => void}) {
   return (
@@ -394,7 +507,7 @@ function DashboardContent() {
               <div className="text-white font-semibold mb-3">Выбросы CO<sub>2</sub></div>
               <div className="w-full min-w-0">
                 <ResponsiveContainer width="100%" height={160}>
-                  <AreaChart data={co2Data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                  <AreaChart data={portDataChart[selectedPort]?.co2 || co2Data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="co2Fill" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#62a074" stopOpacity={0.35} />
@@ -415,7 +528,7 @@ function DashboardContent() {
               <div className="text-white font-semibold mb-3">Показатели температуры</div>
               <div className="w-full min-w-0">
                 <ResponsiveContainer width="100%" height={160}>
-                  <AreaChart data={tempData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                  <AreaChart data={portDataChart[selectedPort]?.temp || tempData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="tempFill" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#62a074" stopOpacity={0.35} />
@@ -441,44 +554,38 @@ function DashboardContent() {
 }
 
 function ComparePage() {
-  // Mock comparison datasets
-  const co2A = co2Data; // series A
-  const co2B = [
-    { t: 't1', v: 26 },
-    { t: 't2', v: 40 },
-    { t: 't3', v: 46 },
-    { t: 't4', v: 52 },
-    { t: 't5', v: 58 },
-    { t: 't6', v: 50 },
-    { t: 't7', v: 68 },
-    { t: 't8', v: 55 },
-  ];
-
-  const tempA = tempData;
-  const tempB = [
-    { t: 't1', v: 48 },
-    { t: 't2', v: 60 },
-    { t: 't3', v: 55 },
-    { t: 't4', v: 65 },
-    { t: 't5', v: 52 },
-    { t: 't6', v: 62 },
-    { t: 't7', v: 58 },
-    { t: 't8', v: 67 },
-  ];
+  const [portA, setPortA] = useState<string>('Баку');
+  const [portB, setPortB] = useState<string>('Астрахань');
 
   // Merge by key for Recharts multi-series
   const mergeByKey = (a: {t:string,v:number}[], b: {t:string,v:number}[]) => a.map((p, i) => ({ t: p.t, a: p.v, b: b[i]?.v ?? p.v }));
-  const co2Merged = mergeByKey(co2A, co2B);
-  const tempMerged = mergeByKey(tempA, tempB);
+  const co2Merged = mergeByKey(portDataChart[portA]?.co2 || co2Data, portDataChart[portB]?.co2 || co2Data);
+  const tempMerged = mergeByKey(portDataChart[portA]?.temp || tempData, portDataChart[portB]?.temp || tempData);
 
   return (
     <div className="w-full">
       <h1 className="text-white text-2xl font-semibold mb-4">Сравнение</h1>
+      <div className="flex gap-4 mb-4">
+        <select value={portA} onChange={(e) => setPortA(e.target.value)} className="p-2 rounded bg-[#23282e] text-white border border-gray-600">
+          <option value="Махачкала">Махачкала</option>
+          <option value="Баку">Баку</option>
+          <option value="Астрахань">Астрахань</option>
+          <option value="Актау">Актау</option>
+          <option value="Туркменбаш">Туркменбаш</option>
+        </select>
+        <select value={portB} onChange={(e) => setPortB(e.target.value)} className="p-2 rounded bg-[#23282e] text-white border border-gray-600">
+          <option value="Махачкала">Махачкала</option>
+          <option value="Баку">Баку</option>
+          <option value="Астрахань">Астрахань</option>
+          <option value="Актау">Актау</option>
+          <option value="Туркменбаш">Туркменбаш</option>
+        </select>
+      </div>
       <div className="grid grid-cols-1 gap-6">
         {/* CO2 comparison */}
         <div className="bg-[#23282e] rounded-xl p-6">
           <div className="text-white font-semibold mb-1">Выбросы CO₂ — сравнение</div>
-          <div className="text-gray-400 text-sm mb-4">Серия A (зелёный) vs Серия B (синий)</div>
+          <div className="text-gray-400 text-sm mb-4">{portA} (зелёный) vs {portB} (синий)</div>
           <div className="w-full min-w-0" style={{ height: 280 }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={co2Merged} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -508,7 +615,7 @@ function ComparePage() {
         {/* Temperature comparison */}
         <div className="bg-[#23282e] rounded-xl p-6">
           <div className="text-white font-semibold mb-1">Показатели температуры — сравнение</div>
-          <div className="text-gray-400 text-sm mb-4">Серия A (зелёный) vs Серия B (синий)</div>
+          <div className="text-gray-400 text-sm mb-4">{portA} (зелёный) vs {portB} (синий)</div>
           <div className="w-full min-w-0" style={{ height: 280 }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={tempMerged} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
